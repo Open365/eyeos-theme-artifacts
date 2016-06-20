@@ -17,26 +17,24 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-define([], function () {
-	function AddonTemplatesExtractor(productInfo) {
-		this.productInfo = productInfo;
-	}
-
-	AddonTemplatesExtractor.prototype.getAddonTemplates = function () {
-		var data = {};
-		this.productInfo.addons.forEach(function (addon) {
-			var templates = addon.templates;
-			for(var key in templates) {
-				if (!data[key]) {
-					data[key] = [];
-				}
-
-				data[key].push.apply(data[key], templates[key]);
-			}
-		});
-
-		return data;
+define(['./SassFetcher', './SassCompiler'], function (SassFetcher, SassCompiler) {
+	var ProductSassCompiler = function(settings, sassFetcher, sassCompiler) {
+		this.sassFetcher = sassFetcher || new SassFetcher(settings);
+		this.sassCompiler = sassCompiler || new SassCompiler();
 	};
-	
-	return AddonTemplatesExtractor;
+
+	ProductSassCompiler.prototype.compile = function(sassFiles, callback) {
+		var self = this;
+		this.sassFetcher.fetchSass(sassFiles, function sassFetchedDone(err, sassData) {
+			if (err) {
+				callback(err, sassData);
+				return;
+			}
+			self.sassCompiler.compile(sassData, function compileDone(err, cssData) {
+				callback(err, cssData);
+			});
+		});
+	};
+
+	return ProductSassCompiler;
 });

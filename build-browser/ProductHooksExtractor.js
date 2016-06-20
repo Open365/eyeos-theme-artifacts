@@ -18,25 +18,32 @@
 */
 
 define([], function () {
-	function AddonTemplatesExtractor(productInfo) {
+
+	var ProductHooksExtractor = function (productInfo) {
 		this.productInfo = productInfo;
-	}
+	};
 
-	AddonTemplatesExtractor.prototype.getAddonTemplates = function () {
-		var data = {};
+	ProductHooksExtractor.prototype.getHooks = function () {
+		var hooks = {};
+
 		this.productInfo.addons.forEach(function (addon) {
-			var templates = addon.templates;
-			for(var key in templates) {
-				if (!data[key]) {
-					data[key] = [];
-				}
-
-				data[key].push.apply(data[key], templates[key]);
-			}
+			var keys = Object.keys(addon.hooks);
+			keys.forEach(function (hookfile) {
+				var path = "addons/" + addon.name + "/templates/" + addon.hooks[hookfile]
+				hooks[hookfile] = path;
+			});
 		});
 
-		return data;
+		this.productInfo.products.forEach(function (product) {
+			var keys = Object.keys(product.hooks);
+			keys.forEach(function (hookfile) {
+				var path = "products/" + product.name + "/templates/" + product.hooks[hookfile];
+				hooks[hookfile] = path;
+			});
+		});
+
+		return hooks;
 	};
-	
-	return AddonTemplatesExtractor;
+
+	return ProductHooksExtractor;
 });

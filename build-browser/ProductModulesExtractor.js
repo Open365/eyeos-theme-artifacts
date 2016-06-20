@@ -18,25 +18,30 @@
 */
 
 define([], function () {
-	function AddonTemplatesExtractor(productInfo) {
+
+	var ProductModulesExtractor = function (productInfo) {
 		this.productInfo = productInfo;
-	}
-
-	AddonTemplatesExtractor.prototype.getAddonTemplates = function () {
-		var data = {};
-		this.productInfo.addons.forEach(function (addon) {
-			var templates = addon.templates;
-			for(var key in templates) {
-				if (!data[key]) {
-					data[key] = [];
-				}
-
-				data[key].push.apply(data[key], templates[key]);
-			}
-		});
-
-		return data;
 	};
-	
-	return AddonTemplatesExtractor;
+
+	ProductModulesExtractor.prototype.getModules = function () {
+		var modules = {};
+
+		var iterateModules = function (item) {
+			if (!item.modules) {
+				return;
+			}
+			item.modules.forEach(function (module) {
+				var path = "modules/" + module + "/" + module;
+				modules[module] = path;
+			});
+		};
+
+		this.productInfo.addons.forEach(iterateModules);
+
+		this.productInfo.products.forEach(iterateModules);
+
+		return modules;
+	};
+
+	return ProductModulesExtractor;
 });
